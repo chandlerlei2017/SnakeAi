@@ -1,39 +1,26 @@
 import pygame
-from classes import Snake
+from classes import Board
 
 width = 500
 height = 500
 rows = 20
-
-
-def drawGrid(width, rows, surface):
-    sizeBtwn = width // rows
-    inc = 0
-
-    for l in range(rows):
-        inc += sizeBtwn
-
-        pygame.draw.line(surface, (255, 255, 255), (inc, 0), (inc, width))
-        pygame.draw.line(surface, (255, 255, 255), (0, inc), (width, inc))
-
-
-def redrawWindow(surface):
-    surface.fill((0, 0, 0))
-    drawGrid(width, rows, surface)
-    pygame.display.update()
+cols = 20
+surface = pygame.display.set_mode((width, height))
+black = (0, 0, 0)
 
 
 def main():
-    surface = pygame.display.set_mode((width, height))
-    s = Snake((255, 0, 0), (10, 10))
-
-    flag = True
+    b = Board(surface, width, height, rows,  cols, black)
     clock = pygame.time.Clock()
 
-    while flag:
+    while True:
         pygame.time.delay(50)
         clock.tick(10)
-        redrawWindow(surface)
+
+        if pygame.QUIT in list(map(lambda event: event.type, pygame.event.get())):
+            pygame.quit()
+
+        b.redraw_surface()
 
 
 main()
