@@ -10,7 +10,7 @@ black = (0, 0, 0)
 
 
 def main():
-    b = Board(surface, width, height, rows,  cols, black)
+    b = Board(surface, width, height, rows, cols, black)
     clock = pygame.time.Clock()
 
     while True:
