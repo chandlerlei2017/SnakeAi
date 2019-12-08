@@ -8,14 +8,13 @@ rows = 20
 
 def drawGrid(width, rows, surface):
     sizeBtwn = width // rows
-    x = y = 0
+    inc = 0
 
     for l in range(rows):
-        x += sizeBtwn
-        y += sizeBtwn
+        inc += sizeBtwn
 
-        pygame.draw.line(surface, (255, 255, 255), (x, 0), (x, width))
-        pygame.draw.line(surface, (255, 255, 255), (0, y), (width, y))
+        pygame.draw.line(surface, (255, 255, 255), (inc, 0), (inc, width))
+        pygame.draw.line(surface, (255, 255, 255), (0, inc), (width, inc))
 
 
 def redrawWindow(surface):
