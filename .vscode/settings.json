@@ -1,0 +1,6 @@
+{
+    "editor.formatOnSave": true,
+    "python.linting.pycodestyleEnabled": true,
+    "python.formatting.provider": "autopep8",
+    "python.pythonPath": "/home/chandlerlei2017/.local/share/virtualenvs/SnakeAi-IrDQfaTB/bin/python",
+}
