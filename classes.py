@@ -11,7 +11,7 @@ class Board(object):
         [snack_x, snack_y] = [snake_x, snake_y]
 
         while [snack_x, snack_y] == [snake_x, snake_y]:
-            [snack_x, snack_y] = [randrange(3, cols - 3), randrange(3, rows-3)]
+            [snack_x, snack_y] = [randrange(cols), randrange(rows)]
 
         self.dir_x = -1
         self.dir_y = 0
@@ -36,6 +36,7 @@ class Board(object):
         self.surface.fill((0, 0, 0))
         self.draw_grid()
         self.update_dir()
+        self.move_snake()
         self.draw_snake()
         self.draw_snack()
         pygame.display.update()
@@ -68,17 +69,28 @@ class Board(object):
             self.dir_x = 0
             self.dir_y = 1
 
-    def draw_snake(self):
+    def move_snake(self):
         self.snake.move(self.dir_x, self.dir_y)
+
+        if self.snake.head.x == self.snack.x and self.snake.head.y == self.snack.y:
+            self.random_snack()
+
+    def draw_snake(self):
         self.snake.draw(self.surface)
 
     def draw_snack(self):
         self.snack.draw(self.surface)
 
     def random_snack(self):
-        new_x = randrange(self.cols)
-        new_y = randrange(self.rows)
-        # TODO
+        new_x = self.snake.head.x
+        new_y = self.snake.head.y
+
+        while [new_x, new_y] in map(lambda square: [square.x, square.y], self.snake.body):
+            new_x = randrange(self.cols)
+            new_y = randrange(self.rows)
+
+        self.snack.x = new_x
+        self.snack.y = new_y
 
 
 class Square(object):
