@@ -1,18 +1,30 @@
 import pygame
 from random import randrange
+
+import tkinter as tk
+from tkinter import messagebox
+
 white = (255, 255, 255)
 green = (34, 139, 34)
 red = (255, 8, 0)
 
 
+def message_box(subject, content):
+    root = tk.Tk()
+    root.attributes("-topmost", True)
+    root.withdraw()
+    messagebox.showinfo(subject, content)
+    try:
+        root.destroy()
+    except:
+        pass
+
+
 class Board(object):
+    snake = None
+    snack = None
+
     def __init__(self, surface, width, height, rows, cols, colour):
-        [snake_x, snake_y] = [randrange(3, cols - 3), randrange(3, rows - 3)]
-        [snack_x, snack_y] = [snake_x, snake_y]
-
-        while [snack_x, snack_y] == [snake_x, snake_y]:
-            [snack_x, snack_y] = [randrange(cols), randrange(rows)]
-
         self.surface = surface
         self.colour = colour
 
@@ -23,11 +35,7 @@ class Board(object):
         self.squareWidth = self.width // self.cols
         self.squareHeight = self.height // self.rows
 
-        self.snake = Snake(snake_x, snake_y, -1, 0, green,
-                           self.squareHeight, self.squareWidth)
-
-        self.snack = Square(snack_x, snack_y, 0, 0, red,
-                            self.squareHeight, self.squareWidth)
+        self.reset_game()
 
     def redraw_surface(self):
         self.surface.fill((0, 0, 0))
@@ -47,12 +55,48 @@ class Board(object):
             pygame.draw.line(self.surface, white, (y*self.squareWidth, 0),
                              (y*self.squareWidth, self.height))
 
+    def reset_game(self):
+        self.score = 0
+
+        [snake_x, snake_y] = [
+            randrange(3, self.cols - 3), randrange(3, self.rows - 3)]
+        [snack_x, snack_y] = [snake_x, snake_y]
+
+        while [snack_x, snack_y] == [snake_x, snake_y]:
+            [snack_x, snack_y] = [randrange(self.cols), randrange(self.rows)]
+
+        if self.snake:
+            del self.snake
+        if self.snack:
+            del self.snack
+
+        self.snake = Snake(snake_x, snake_y, -1, 0, green,
+                           self.squareHeight, self.squareWidth)
+
+        self.snack = Square(snack_x, snack_y, 0, 0, red,
+                            self.squareHeight, self.squareWidth)
+
     def move_snake(self):
         self.snake.move()
 
-        if self.snake.head.x == self.snack.x and self.snake.head.y == self.snack.y:
-            self.random_snack()
+        # TODO
+
+        if not self.snake.valid() or not self.snake_inbounds():
+            message_box(
+                "You Died!", "Your final score was: {}, Start Over?".format(self.score))
+            self.reset_game()
+
+        elif [self.snake.head.x, self.snake.head.y] == [self.snack.x, self.snack.y]:
+            self.score += 1
             self.snake.addSquare()
+            self.random_snack()
+
+    def snake_inbounds(self):
+        print(self.snake.head.x, self.snake.head.y)
+        if self.snake.head.x < 0 or self.snake.head.x >= self.cols or self.snake.head.y < 0 or self.snake.head.y >= self.rows:
+            return False
+
+        return True
 
     def draw_snake(self):
         self.snake.draw(self.surface)
@@ -88,7 +132,6 @@ class Square(object):
         self.y += self.dir_y
 
     def draw(self, surface):
-        print(self.x, self.y, self.width, self.height)
         pygame.draw.rect(surface, self.colour,
                          (self.x*self.width, self.y*self.height, self.width, self.height))
 
@@ -143,12 +186,13 @@ class Snake(object):
 
             square.move()
 
+    def valid(self):
+        if [self.head.x, self.head.y] in [[square.x, square.y] for square in self.body[1:]]:
+            return False
+
+        return True
+
     def addSquare(self):
         prev_square = self.body[-1]
         self.body.append(Square(prev_square.x - prev_square.dir_x,
                                 prev_square.y - prev_square.dir_y, prev_square.dir_x, prev_square.dir_y, green, self.square_height, self.square_width))
-
-
-class Snack(Square):
-    def __init__(self):
-        pass
