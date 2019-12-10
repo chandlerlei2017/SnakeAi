@@ -79,8 +79,6 @@ class Board(object):
     def move_snake(self):
         self.snake.move()
 
-        # TODO
-
         if not self.snake.valid() or not self.snake_inbounds():
             message_box(
                 "You Died!", "Your final score was: {}, Start Over?".format(self.score))
@@ -92,7 +90,6 @@ class Board(object):
             self.random_snack()
 
     def snake_inbounds(self):
-        print(self.snake.head.x, self.snake.head.y)
         if self.snake.head.x < 0 or self.snake.head.x >= self.cols or self.snake.head.y < 0 or self.snake.head.y >= self.rows:
             return False
 
