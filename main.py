@@ -1,10 +1,10 @@
 import pygame
 from classes import Board
 
-width = 1000
-height = 1000
-rows = 40
-cols = 40
+width = 600
+height = 600
+rows = 24
+cols = 24
 surface = pygame.display.set_mode((width, height))
 black = (0, 0, 0)
 

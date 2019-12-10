@@ -13,9 +13,6 @@ class Board(object):
         while [snack_x, snack_y] == [snake_x, snake_y]:
             [snack_x, snack_y] = [randrange(cols), randrange(rows)]
 
-        self.dir_x = -1
-        self.dir_y = 0
-
         self.surface = surface
         self.colour = colour
 
@@ -26,16 +23,16 @@ class Board(object):
         self.squareWidth = self.width // self.cols
         self.squareHeight = self.height // self.rows
 
-        self.snake = Snake(snake_x, snake_y, green,
+        self.snake = Snake(snake_x, snake_y, -1, 0, green,
                            self.squareHeight, self.squareWidth)
 
-        self.snack = Square(snack_x, snack_y, red,
+        self.snack = Square(snack_x, snack_y, 0, 0, red,
                             self.squareHeight, self.squareWidth)
 
     def redraw_surface(self):
         self.surface.fill((0, 0, 0))
         self.draw_grid()
-        self.update_dir()
+        self.snake.update_dir()
         self.move_snake()
         self.draw_snake()
         self.draw_snack()
@@ -50,30 +47,12 @@ class Board(object):
             pygame.draw.line(self.surface, white, (y*self.squareWidth, 0),
                              (y*self.squareWidth, self.height))
 
-    def update_dir(self):
-        keys = pygame.key.get_pressed()
-
-        if keys[pygame.K_LEFT] and self.dir_x == 0:
-            self.dir_x = -1
-            self.dir_y = 0
-
-        elif keys[pygame.K_RIGHT] and self.dir_x == 0:
-            self.dir_x = 1
-            self.dir_y = 0
-
-        elif keys[pygame.K_UP] and self.dir_y == 0:
-            self.dir_x = 0
-            self.dir_y = -1
-
-        elif keys[pygame.K_DOWN] and self.dir_y == 0:
-            self.dir_x = 0
-            self.dir_y = 1
-
     def move_snake(self):
-        self.snake.move(self.dir_x, self.dir_y)
+        self.snake.move()
 
         if self.snake.head.x == self.snack.x and self.snake.head.y == self.snack.y:
             self.random_snack()
+            self.snake.addSquare()
 
     def draw_snake(self):
         self.snake.draw(self.surface)
@@ -94,34 +73,80 @@ class Board(object):
 
 
 class Square(object):
-    def __init__(self, x, y, colour, height, width):
+    def __init__(self, x, y, dir_x, dir_y, colour, height, width):
         self.x = x
         self.y = y
+        self.dir_x = dir_x
+        self.dir_y = dir_y
+
         self.colour = colour
         self.height = height
         self.width = width
 
-    def move(self, dir_x, dir_y):
-        self.x += dir_x
-        self.y += dir_y
+    def move(self):
+        self.x += self.dir_x
+        self.y += self.dir_y
 
     def draw(self, surface):
+        print(self.x, self.y, self.width, self.height)
         pygame.draw.rect(surface, self.colour,
                          (self.x*self.width, self.y*self.height, self.width, self.height))
 
 
 class Snake(object):
-    def __init__(self, x, y, colour, height, width):
-        self.head = Square(x, y, colour, height, width)
+    def __init__(self, x, y, dir_x, dir_y, colour, height, width):
+        self.head = Square(x, y, dir_x, dir_y, colour, height, width)
         self.body = [self.head]
+        self.turns = {}
+        self.square_height = height
+        self.square_width = width
+
+    def update_dir(self):
+        keys = pygame.key.get_pressed()
+
+        if keys[pygame.K_LEFT] and self.head.dir_x == 0:
+            self.head.dir_x = -1
+            self.head.dir_y = 0
+
+            self.turns[(self.head.x, self.head.y)] = [-1, 0]
+
+        elif keys[pygame.K_RIGHT] and self.head.dir_x == 0:
+            self.head.dir_x = 1
+            self.head.dir_y = 0
+
+            self.turns[(self.head.x, self.head.y)] = [1, 0]
+
+        elif keys[pygame.K_UP] and self.head.dir_y == 0:
+            self.head.dir_x = 0
+            self.head.dir_y = -1
+
+            self.turns[(self.head.x, self.head.y)] = [0, -1]
+
+        elif keys[pygame.K_DOWN] and self.head.dir_y == 0:
+            self.head.dir_x = 0
+            self.head.dir_y = 1
+
+            self.turns[(self.head.x, self.head.y)] = [0, 1]
 
     def draw(self, surface):
         for square in self.body:
             square.draw(surface)
 
-    def move(self, dir_x, dir_y):
-        for square in self.body:
-            square.move(dir_x, dir_y)
+    def move(self):
+        for index, square in enumerate(self.body):
+            temp_cord = (square.x, square.y)
+            if temp_cord in self.turns:
+                [square.dir_x, square.dir_y] = self.turns[temp_cord]
+
+                if index == len(self.body) - 1:
+                    del self.turns[temp_cord]
+
+            square.move()
+
+    def addSquare(self):
+        prev_square = self.body[-1]
+        self.body.append(Square(prev_square.x - prev_square.dir_x,
+                                prev_square.y - prev_square.dir_y, prev_square.dir_x, prev_square.dir_y, green, self.square_height, self.square_width))
 
 
 class Snack(Square):
