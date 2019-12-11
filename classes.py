@@ -1,5 +1,6 @@
 import pygame
 from random import randrange
+import math
 
 import tkinter as tk
 from tkinter import messagebox
@@ -76,6 +77,9 @@ class Board(object):
         self.snack = Square(snack_x, snack_y, 0, 0, red,
                             self.squareHeight, self.squareWidth)
 
+        self.snake_snack_dist = math.sqrt(
+            (snake_x - snack_x)**2 + (snake_y - snack_y)**2)
+
     def move_snake(self):
         self.snake.move()
 
@@ -85,9 +89,19 @@ class Board(object):
             self.reset_game()
 
         elif [self.snake.head.x, self.snake.head.y] == [self.snack.x, self.snack.y]:
-            self.score += 1
+            self.score += 15
             self.snake.addSquare()
             self.random_snack()
+        else:
+            new_dist = math.sqrt(
+                (self.snake.head.x - self.snack.x)**2 + (self.snake.head.y - self.snack.y)**2)
+
+            if new_dist > self.snake_snack_dist:
+                self.score -= 2
+            else:
+                self.score += 1
+
+            self.snake_snack_dist = new_dist
 
     def snake_inbounds(self):
         if self.snake.head.x < 0 or self.snake.head.x >= self.cols or self.snake.head.y < 0 or self.snake.head.y >= self.rows:
