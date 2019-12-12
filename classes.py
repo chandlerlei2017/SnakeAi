@@ -1,5 +1,5 @@
 import pygame
-from random import randrange
+from random import randrange, choice
 import math
 
 import tkinter as tk
@@ -25,9 +25,11 @@ class Board(object):
     snake = None
     snack = None
 
-    def __init__(self, surface, width, height, rows, cols, colour):
+    def __init__(self, surface, width, height, rows, cols, colour, human_playing=True, timeout=100):
         self.surface = surface
         self.colour = colour
+        self.human_playing = human_playing
+        self.timeout = timeout
 
         self.width = width
         self.height = height
@@ -38,14 +40,56 @@ class Board(object):
 
         self.reset_game()
 
+    def reset_game(self):
+        self.score = 0
+        self.finished = False
+        self.count = 0
+
+        snake_x, snake_y = randrange(
+            3, self.cols - 3), randrange(3, self.rows - 3)
+        snack_x, snack_y = snake_x, snake_y
+
+        while [snack_x, snack_y] == [snake_x, snake_y]:
+            [snack_x, snack_y] = [randrange(self.cols), randrange(self.rows)]
+
+        if self.snake:
+            del self.snake
+        if self.snack:
+            del self.snack
+
+        init_dir_x = choice([0, choice([1, -1])])
+
+        if init_dir_x != 0:
+            init_dir_y = 0
+        else:
+            init_dir_y = choice([1, -1])
+
+        self.snake = Snake(snake_x, snake_y, init_dir_x, init_dir_y, green,
+                           self.squareHeight, self.squareWidth)
+
+        self.snack = Square(snack_x, snack_y, 0, 0, red,
+                            self.squareHeight, self.squareWidth)
+
+        self.snake_snack_dist = math.sqrt(
+            (snake_x - snack_x)**2 + (snake_y - snack_y)**2)
+
     def redraw_surface(self):
+        if self.count > self.timeout:
+            self.finished = True
+
         self.surface.fill((0, 0, 0))
         self.draw_grid()
-        self.snake.update_dir()
+
+        if self.human_playing:
+            self.snake.update_dir_human()
+        else:
+            self.snake.update_dir_ai()
+
         self.move_snake()
         self.draw_snake()
         self.draw_snack()
         pygame.display.update()
+        self.count += 1
 
     def draw_grid(self):
         for x in range(1, self.rows):
@@ -56,37 +100,15 @@ class Board(object):
             pygame.draw.line(self.surface, white, (y*self.squareWidth, 0),
                              (y*self.squareWidth, self.height))
 
-    def reset_game(self):
-        self.score = 0
-
-        [snake_x, snake_y] = [
-            randrange(3, self.cols - 3), randrange(3, self.rows - 3)]
-        [snack_x, snack_y] = [snake_x, snake_y]
-
-        while [snack_x, snack_y] == [snake_x, snake_y]:
-            [snack_x, snack_y] = [randrange(self.cols), randrange(self.rows)]
-
-        if self.snake:
-            del self.snake
-        if self.snack:
-            del self.snack
-
-        self.snake = Snake(snake_x, snake_y, -1, 0, green,
-                           self.squareHeight, self.squareWidth)
-
-        self.snack = Square(snack_x, snack_y, 0, 0, red,
-                            self.squareHeight, self.squareWidth)
-
-        self.snake_snack_dist = math.sqrt(
-            (snake_x - snack_x)**2 + (snake_y - snack_y)**2)
-
     def move_snake(self):
         self.snake.move()
 
         if not self.snake.valid() or not self.snake_inbounds():
-            message_box(
-                "You Died!", "Your final score was: {}, Start Over?".format(self.score))
-            self.reset_game()
+            if self.human_playing:
+                message_box(
+                    "You Died!", "Your final score was: {}, Start Over?".format(self.score))
+                self.reset_game()
+            self.finished = True
 
         elif [self.snake.head.x, self.snake.head.y] == [self.snack.x, self.snack.y]:
             self.score += 15
@@ -155,7 +177,7 @@ class Snake(object):
         self.square_height = height
         self.square_width = width
 
-    def update_dir(self):
+    def update_dir_human(self):
         keys = pygame.key.get_pressed()
 
         if keys[pygame.K_LEFT] and self.head.dir_x == 0:
@@ -181,6 +203,20 @@ class Snake(object):
             self.head.dir_y = 1
 
             self.turns[(self.head.x, self.head.y)] = [0, 1]
+
+    def update_dir_ai(self):
+        dir_mapping = {
+            (1, 0): "R",
+            (-1, 0): "L",
+            (0, -1): "U",
+            (0, 1): "D"
+        }
+        curr_dir = dir_mapping[(self.head.dir_x, self.head.dir_y)]
+        print(curr_dir)
+
+        temp = self.head.dir_y
+        self.head.dir_y = self.head.dir_x
+        self.head.dir_x = - temp
 
     def draw(self, surface):
         for square in self.body:
