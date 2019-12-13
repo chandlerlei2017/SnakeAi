@@ -9,7 +9,10 @@ pylint = "*"
 
 [packages]
 pygame = "*"
-tkinter = "*"
+tensorflow = "*"
+numpy = "*"
+pydot = "*"
+graphviz = "*"
 
 [requires]
 python_version = "3.6"

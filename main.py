@@ -5,14 +5,15 @@ width = 600
 height = 600
 rows = 24
 cols = 24
-surface = pygame.display.set_mode((width, height))
+
 black = (0, 0, 0)
+
+surface = pygame.display.set_mode((width, height))
+b = Board(surface, width, height, rows, cols, black)
+clock = pygame.time.Clock()
 
 
 def main():
-    b = Board(surface, width, height, rows, cols, black)
-    clock = pygame.time.Clock()
-
     while True:
         pygame.time.delay(50)
         clock.tick(10)
