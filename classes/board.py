@@ -50,6 +50,11 @@ class Board(object):
         self.finished = False
         self.count = 0
 
+        self.resample = 0
+        self.resample_limit = 15
+        self.sample = [-1, -1]
+        self.sample_repeat = 0
+
         snake_x, snake_y = randrange(
             3, self.cols - 3), randrange(3, self.rows - 3)
         snack_x, snack_y = snake_x, snake_y
@@ -77,22 +82,19 @@ class Board(object):
         self.snake_snack_dist = math.sqrt((snake_x - snack_x)**2 + (snake_y - snack_y)**2)
 
     def redraw_surface(self):
-        if self.count > self.timeout:
-            self.finished = True
-
         self.surface.fill((0, 0, 0))
         self.draw_grid()
 
         if self.human_playing:
             self.snake.update_dir_human()
+            self.move_snake_human()
         else:
             self.snake.update_dir_ai(self.network, self.snack.x, self.snack.y, self.cols, self.rows)
+            self.move_snake_ai()
 
-        self.move_snake()
         self.draw_snake()
         self.draw_snack()
         pygame.display.update()
-        self.count += 1
 
     def draw_grid(self):
         for x in range(1, self.rows):
@@ -105,29 +107,58 @@ class Board(object):
                 self.surface, WHITE, (y * self.squareWidth, 0),
                 (y * self.squareWidth, self.height))
 
-    def move_snake(self):
+    def move_snake_ai(self):
         self.snake.move()
 
-        if not self.snake.valid() or not self.snake_inbounds():
-            if self.human_playing:
-                message_box("You Died!", "Your final score was: {}, Start Over?".format(self.score))
-                self.reset_game()
+        if self.count > self.timeout or not self.snake.valid() or not self.snake_inbounds():
             self.finished = True
 
         elif [self.snake.head.x, self.snake.head.y] == [self.snack.x, self.snack.y]:
-            self.score += 15
+            self.score += 100
+            self.count = 0
             self.snake.addSquare()
             self.random_snack()
+
         else:
             new_dist = math.sqrt(
                 (self.snake.head.x - self.snack.x)**2 + (self.snake.head.y - self.snack.y)**2)
 
             if new_dist > self.snake_snack_dist:
-                self.score -= 2
+                self.score -= 3
             else:
-                self.score += 1
+                self.score += 2
 
             self.snake_snack_dist = new_dist
+
+        if [self.snake.head.x, self.snake.head.y] == self.sample:
+            self.resample = 0
+            self.sample_repeat += 1
+
+        elif self.resample == self.resample_limit:
+            self.resample = 0
+            self.sample_repeat = 0
+            self.sample = [self.snake.head.x, self.snake.head.y]
+
+        else:
+            self.resample += 1
+
+        if self.sample_repeat >= 3:
+            self.score -= 100
+            self.finished = True
+
+        self.count += 1
+
+    def move_snake_human(self):
+        self.snake.move()
+
+        if not self.snake.valid() or not self.snake_inbounds():
+            message_box("You Died!", "Your final score was: {}, Start Over?".format(self.score))
+            self.reset_game()
+
+        elif [self.snake.head.x, self.snake.head.y] == [self.snack.x, self.snack.y]:
+            self.score += 100
+            self.snake.addSquare()
+            self.random_snack()
 
     def snake_inbounds(self):
         if self.snake.head.x < 0 or self.snake.head.x >= self.cols or self.snake.head.y < 0 or self.snake.head.y >= self.rows:

@@ -1,44 +1,60 @@
 import pygame
 from classes.board import Board
 from classes.NN import Network
+import csv
+import os
+
+WIDTH = 600
+HEIGHT = 600
+ROWS = 24
+COLS = 24
+
+BLACK = (0, 0, 0)
+
+SURFACE = pygame.display.set_mode((WIDTH, HEIGHT))
+CLOCK = pygame.time.Clock()
+B = Board(SURFACE, WIDTH, HEIGHT, ROWS, COLS, BLACK, False, 150)
+
+GENS = 50
+POP_SIZE = 30
 
 
-width = 600
-height = 600
-rows = 24
-cols = 24
+def get_file_name():
+    files = os.listdir("data")
+    files.sort()
 
-black = (0, 0, 0)
+    if not len(files):
+        return "data/1.csv"
 
-surface = pygame.display.set_mode((width, height))
-clock = pygame.time.Clock()
-b = Board(surface, width, height, rows, cols, black, False, 500)
-
-gens = 2
-pop_size = 20
+    return "data/{}.csv".format(int(files[-1][0]) + 1)
 
 
 def main():
     cont = True
+    # res_file = open(get_file_name(), 'w')
 
-    for i in range(gens):
-        networks = [Network() for i in range(20)]
+    for i in range(GENS):
+        networks = [Network() for i in range(POP_SIZE)]
+        scores = []
 
         for network in networks:
-            b.update_network(network)
+            cont = True
+            B.update_network(network)
 
             while cont:
                 pygame.time.delay(50)
-                clock.tick(10)
+                CLOCK.tick(10)
 
                 if pygame.QUIT in list(map(lambda event: event.type, pygame.event.get())):
                     pygame.quit()
 
-                b.redraw_surface()
-                cont = not b.finished
+                B.redraw_surface()
+                cont = not B.finished
 
-            b.reset_game()
-            cont = True
+            scores.append(B.score)
+            print(B.score)
+
+            B.reset_game()
 
 
 main()

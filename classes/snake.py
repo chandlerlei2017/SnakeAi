@@ -104,8 +104,6 @@ class Snake(object):
                 int(s_left),
                 int(s_right)])
 
-        print(res, max(res))
-
         if res.index(max(res)) == 1:
             temp = self.head.dir_y
             self.head.dir_y = - self.head.dir_x
@@ -113,15 +111,12 @@ class Snake(object):
 
             self.turns[(self.head.x, self.head.y)] = [self.head.dir_x, self.head.dir_y]
 
-        if res.index(max(res)) == 2:
+        elif res.index(max(res)) == 2:
             temp = self.head.dir_y
             self.head.dir_y = self.head.dir_x
             self.head.dir_x = - temp
 
             self.turns[(self.head.x, self.head.y)] = [self.head.dir_x, self.head.dir_y]
-
-        else:
-            pass
 
     def draw(self, surface):
         for square in self.body:
