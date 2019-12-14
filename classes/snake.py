@@ -1,7 +1,7 @@
-from classes.square import Square
 import pygame
+from classes.square import Square
 
-green = (34, 139, 34)
+GREEN = (34, 139, 34)
 
 
 class Snake(object):
@@ -147,4 +147,4 @@ class Snake(object):
     def addSquare(self):
         prev_square = self.body[-1]
         self.body.append(Square(prev_square.x - prev_square.dir_x, prev_square.y - prev_square.dir_y,
-                                prev_square.dir_x, prev_square.dir_y, green, self.square_height, self.square_width))
+                                prev_square.dir_x, prev_square.dir_y, GREEN, self.square_height, self.square_width))

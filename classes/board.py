@@ -7,9 +7,9 @@ from tkinter import messagebox
 from classes.snake import Snake
 from classes.square import Square
 
-white = (255, 255, 255)
-green = (34, 139, 34)
-red = (255, 8, 0)
+WHITE = (255, 255, 255)
+GREEN = (34, 139, 34)
+RED = (255, 8, 0)
 
 
 def message_box(subject, content):
@@ -70,9 +70,9 @@ class Board(object):
             init_dir_y = choice([1, -1])
 
         self.snake = Snake(snake_x, snake_y, init_dir_x, init_dir_y,
-                           green, self.squareHeight, self.squareWidth)
+                           GREEN, self.squareHeight, self.squareWidth)
 
-        self.snack = Square(snack_x, snack_y, 0, 0, red, self.squareHeight, self.squareWidth)
+        self.snack = Square(snack_x, snack_y, 0, 0, RED, self.squareHeight, self.squareWidth)
 
         self.snake_snack_dist = math.sqrt((snake_x - snack_x)**2 + (snake_y - snack_y)**2)
 
@@ -97,12 +97,12 @@ class Board(object):
     def draw_grid(self):
         for x in range(1, self.rows):
             pygame.draw.line(
-                self.surface, white, (0, x * self.squareHeight),
+                self.surface, WHITE, (0, x * self.squareHeight),
                 (self.width, x * self.squareHeight))
 
         for y in range(1, self.cols):
             pygame.draw.line(
-                self.surface, white, (y * self.squareWidth, 0),
+                self.surface, WHITE, (y * self.squareWidth, 0),
                 (y * self.squareWidth, self.height))
 
     def move_snake(self):
