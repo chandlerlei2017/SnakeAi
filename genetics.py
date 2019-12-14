@@ -22,8 +22,9 @@ def main():
     cont = True
 
     for i in range(gens):
-        for j in range(pop_size):
-            network = Network()
+        networks = [Network() for i in range(20)]
+
+        for network in networks:
             b.update_network(network)
 
             while cont:

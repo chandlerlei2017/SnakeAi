@@ -47,7 +47,7 @@ class Snake(object):
             (0, 1): "D"
         }
         curr_dir = dir_mapping[(self.head.dir_x, self.head.dir_y)]
-        body_pos = map(lambda square: (square.x, square.y), self.body)
+        body_pos = list(map(lambda square: (square.x, square.y), self.body))
 
         up_cond = self.head.y > 0 and (self.head.x, self.head.y - 1) not in body_pos
         left_cond = self.head.x > 0 and (self.head.x - 1, self.head.y) not in body_pos
