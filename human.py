@@ -1,5 +1,5 @@
 import pygame
-from classes import Board
+from classes.board import Board
 
 width = 600
 height = 600

@@ -1,6 +1,6 @@
 import pygame
-from classes import Board
-from NN import Network
+from classes.board import Board
+from classes.NN import Network
 
 
 width = 600
