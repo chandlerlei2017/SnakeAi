@@ -27,7 +27,7 @@ class Board(object):
     snake = None
     snack = None
 
-    def __init__(self, surface, width, height, rows, cols, colour, human_playing=True, timeout=100):
+    def __init__(self, surface, width, height, rows, cols, colour, human_playing=True, timeout=500):
         self.surface = surface
         self.colour = colour
         self.human_playing = human_playing
@@ -50,8 +50,8 @@ class Board(object):
         self.finished = False
         self.count = 0
 
-        self.resample = 0
-        self.resample_limit = 15
+        self.resample = 20
+        self.resample_limit = 50
         self.sample = [-1, -1]
         self.sample_repeat = 0
 

@@ -13,3 +13,11 @@ class Network(object):
     def predict(self, inp_arr):
         return(self.model.predict(np.asarray(
             inp_arr, dtype=int).reshape([1, 6])).tolist()[0])
+
+    def get_weights(self):
+        res = []
+
+        for weight in self.model.get_weights():
+            res += weight.flatten().tolist()
+
+        return res
