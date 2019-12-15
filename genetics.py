@@ -1,6 +1,7 @@
 import pygame
 from classes.board import Board
 from classes.NN import Network
+from classes.mutator import Mutator
 import csv
 import os
 
@@ -15,8 +16,11 @@ SURFACE = pygame.display.set_mode((WIDTH, HEIGHT))
 CLOCK = pygame.time.Clock()
 B = Board(SURFACE, WIDTH, HEIGHT, ROWS, COLS, BLACK, False)
 
-GENS = 3
-POP_SIZE = 10
+GENS = 10
+POP_SIZE = 5
+MUTATE_CHANCE = 0.01
+RETAIN_TOP_RATIO = 0.3
+RETAIN_REST_RATIO = 0.1
 
 
 def get_file_name():
@@ -39,6 +43,25 @@ def get_file_name_nn():
     return "data/{}_nn.csv".format(int(files[-1][0]) + 1)
 
 
+def write_data(file_name, file_name_nn, gen, scores, networks):
+    with open(file_name, 'a') as res_file:
+        writer = csv.writer(res_file)
+        writer.writerow([str(gen)] + [score for score in scores] + [max(scores)])
+
+    with open(file_name_nn, 'a') as res_file:
+        writer = csv.writer(res_file)
+
+        for network in networks[:5]:
+            res = []
+
+            for weight in network.get_weights():
+                res += weight.flatten().tolist()
+
+            writer.writerow(res)
+
+        writer.writerow([])
+
+
 def main():
     cont = True
     file_name = get_file_name()
@@ -46,10 +69,14 @@ def main():
 
     with open(file_name, 'w') as res_file:
         writer = csv.writer(res_file)
-        writer.writerow(["Gen"] + ["s_{}".format(i) for i in range(1, POP_SIZE + 1)])
+        writer.writerow(["Gen"] + ["s_{}".format(i) for i in range(1, POP_SIZE + 1)] + ["Max"])
+
+    networks = [Network() for i in range(POP_SIZE)]
+    mutator = Mutator(MUTATE_CHANCE, RETAIN_TOP_RATIO, RETAIN_REST_RATIO)
 
     for i in range(GENS):
-        networks = [Network() for i in range(POP_SIZE)]
+        print("GEN {}".format(i + 1))
+        print("##############################################")
         scores = []
 
         for network in networks:
@@ -71,19 +98,10 @@ def main():
 
             B.reset_game()
 
-        final = sorted(list(zip(scores, networks)), key=lambda x: x[0], reverse=True)
+        new_scores, networks = (list(t) for t in zip(*sorted(zip(scores, networks), key=lambda x: x[0], reverse=True)))
+        write_data(file_name, file_name_nn, i + 1, scores, networks)
 
-        with open(file_name, 'a') as res_file:
-            writer = csv.writer(res_file)
-            writer.writerow([str(i + 1)] + [score for score in scores])
-
-        with open(file_name_nn, 'a') as res_file:
-            writer = csv.writer(res_file)
-
-            for network in final[:5]:
-                writer.writerow(network[1].get_weights())
-
-            writer.writerow([])
+        networks = mutator.generate_new_networks(networks)
 
 
 main()
