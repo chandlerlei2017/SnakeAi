@@ -16,11 +16,13 @@ SURFACE = pygame.display.set_mode((WIDTH, HEIGHT))
 CLOCK = pygame.time.Clock()
 B = Board(SURFACE, WIDTH, HEIGHT, ROWS, COLS, BLACK, False)
 
-GENS = 10
-POP_SIZE = 5
-MUTATE_CHANCE = 0.01
+GENS = 200
+POP_SIZE = 30
+MUTATE_CHANCE = 0.3
 RETAIN_TOP_RATIO = 0.3
 RETAIN_REST_RATIO = 0.1
+
+LAYERS = [36, 20, 3]
 
 
 def get_file_name():
@@ -62,6 +64,9 @@ def write_data(file_name, file_name_nn, gen, scores, networks):
         writer.writerow([])
 
 
+# Genetics V1 -> 6 4 3 Neural Network
+# Genetics V2 -> 36 20 3 Neural Network
+
 def main():
     cont = True
     file_name = get_file_name()
@@ -71,8 +76,9 @@ def main():
         writer = csv.writer(res_file)
         writer.writerow(["Gen"] + ["s_{}".format(i) for i in range(1, POP_SIZE + 1)] + ["Max"])
 
-    networks = [Network() for i in range(POP_SIZE)]
-    mutator = Mutator(MUTATE_CHANCE, RETAIN_TOP_RATIO, RETAIN_REST_RATIO)
+    # networks = [Network([6, 4, 3]) for i in range(POP_SIZE)]
+    networks = [Network(LAYERS) for i in range(POP_SIZE)]
+    mutator = Mutator(MUTATE_CHANCE, RETAIN_TOP_RATIO, RETAIN_REST_RATIO, LAYERS)
 
     for i in range(GENS):
         print("GEN {}".format(i + 1))
@@ -85,7 +91,7 @@ def main():
 
             while cont:
                 pygame.time.delay(50)
-                CLOCK.tick(10)
+                CLOCK.tick(30)
 
                 if pygame.QUIT in list(map(lambda event: event.type, pygame.event.get())):
                     pygame.quit()

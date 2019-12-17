@@ -49,10 +49,23 @@ class Snake(object):
         curr_dir = dir_mapping[(self.head.dir_x, self.head.dir_y)]
         body_pos = list(map(lambda square: (square.x, square.y), self.body))
 
-        up_cond = self.head.y > 0 and (self.head.x, self.head.y - 1) not in body_pos
-        left_cond = self.head.x > 0 and (self.head.x - 1, self.head.y) not in body_pos
-        down_cond = self.head.y < rows - 1 and (self.head.x, self.head.y + 1) not in body_pos
-        right_cond = self.head.x < cols - 1 and (self.head.x + 1, self.head.y) not in body_pos
+        directions = [[0, -1], [1, -1], [1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1]]
+        clear = [[], [], [], [], [], [], [], []]
+
+        for index, direction in enumerate(directions):
+            head_x, head_y = self.head.x, self.head.y
+
+            for count in range(4):
+                head_x += direction[0]
+                head_y += direction[1]
+
+                clear[index].append(0 <= head_x <= cols - 1 and 0 <= head_y <=
+                                    rows - 1 and (head_x, head_y) not in body_pos)
+
+        # up_cond = self.head.y > 0 and (self.head.x, self.head.y - 1) not in body_pos
+        # left_cond = self.head.x > 0 and (self.head.x - 1, self.head.y) not in body_pos
+        # down_cond = self.head.y < rows - 1 and (self.head.x, self.head.y + 1) not in body_pos
+        # right_cond = self.head.x < cols - 1 and (self.head.x + 1, self.head.y) not in body_pos
 
         snack_up = snack_y < self.head.y
         snack_left = snack_x < self.head.x
@@ -60,49 +73,101 @@ class Snake(object):
         snack_right = snack_x > self.head.x
 
         if curr_dir == "R":
-            c_left = up_cond
-            c_right = down_cond
-            c_foward = right_cond
+            # c_left = up_cond
+            # c_right = down_cond
+            # c_foward = right_cond
 
             s_left = snack_up
-            s_right = snack_down
             s_foward = snack_right
+            s_right = snack_down
+            s_backward = snack_left
+
+            c_l = clear[0]
+            c_lf = clear[1]
+            c_f = clear[2]
+            c_rf = clear[3]
+            c_r = clear[4]
+            c_rb = clear[5]
+            c_b = clear[6]
+            c_lb = clear[7]
 
         elif curr_dir == "L":
-            c_left = down_cond
-            c_right = up_cond
-            c_foward = left_cond
+            # c_left = down_cond
+            # c_right = up_cond
+            # c_foward = left_cond
 
             s_left = snack_down
-            s_right = snack_up
             s_foward = snack_left
+            s_right = snack_up
+            s_backward = snack_right
+
+            c_l = clear[4]
+            c_lf = clear[5]
+            c_f = clear[6]
+            c_rf = clear[7]
+            c_r = clear[0]
+            c_rb = clear[1]
+            c_b = clear[2]
+            c_lb = clear[3]
 
         elif curr_dir == "U":
-            c_left = left_cond
-            c_right = right_cond
-            c_foward = up_cond
+            # c_left = left_cond
+            # c_right = right_cond
+            # c_foward = up_cond
 
             s_left = snack_left
-            s_right = snack_right
             s_foward = snack_up
+            s_right = snack_right
+            s_backward = snack_down
+
+            c_l = clear[6]
+            c_lf = clear[7]
+            c_f = clear[0]
+            c_rf = clear[1]
+            c_r = clear[2]
+            c_rb = clear[3]
+            c_b = clear[4]
+            c_lb = clear[5]
 
         elif curr_dir == "D":
-            c_left = right_cond
-            c_right = left_cond
-            c_foward = down_cond
+            # c_left = right_cond
+            # c_right = left_cond
+            # c_foward = down_cond
 
             s_left = snack_right
-            s_right = snack_left
             s_foward = snack_down
+            s_right = snack_left
+            s_backward = snack_up
 
-        res = network.predict(
-            [
-                int(c_foward),
-                int(c_left),
-                int(c_right),
-                int(s_foward),
-                int(s_left),
-                int(s_right)])
+            c_l = clear[2]
+            c_lf = clear[3]
+            c_f = clear[4]
+            c_rf = clear[5]
+            c_r = clear[6]
+            c_rb = clear[7]
+            c_b = clear[0]
+            c_lb = clear[1]
+
+        # res = network.predict(
+        #     [
+        #         int(c_foward),
+        #         int(c_left),
+        #         int(c_right),
+        #         int(s_foward),
+        #         int(s_left),
+        #         int(s_right)])
+
+        predict_input = [int(s_left), int(s_right), int(s_foward), int(s_backward)]
+        predict_input += [int(x) for x in c_l]
+        predict_input += [int(x) for x in c_lf]
+        predict_input += [int(x) for x in c_f]
+        predict_input += [int(x) for x in c_rf]
+        predict_input += [int(x) for x in c_r]
+        predict_input += [int(x) for x in c_rb]
+        predict_input += [int(x) for x in c_b]
+        predict_input += [int(x) for x in c_lb]
+
+        res = network.predict(predict_input)
 
         if res.index(max(res)) == 1:
             temp = self.head.dir_y

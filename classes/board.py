@@ -27,7 +27,7 @@ class Board(object):
     snake = None
     snack = None
 
-    def __init__(self, surface, width, height, rows, cols, colour, human_playing=True, timeout=500):
+    def __init__(self, surface, width, height, rows, cols, colour, human_playing=True, timeout=200):
         self.surface = surface
         self.colour = colour
         self.human_playing = human_playing
@@ -110,7 +110,11 @@ class Board(object):
     def move_snake_ai(self):
         self.snake.move()
 
-        if self.count > self.timeout or not self.snake.valid() or not self.snake_inbounds():
+        if self.count > self.timeout:
+            self.score -= 100
+            self.finished = True
+
+        elif not self.snake.valid() or not self.snake_inbounds():
             self.finished = True
 
         elif [self.snake.head.x, self.snake.head.y] == [self.snack.x, self.snack.y]:

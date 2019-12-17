@@ -3,19 +3,25 @@ import numpy as np
 
 
 class Network(object):
-    def __init__(self):
+    def __init__(self, layers):
+        self.input_nodes = layers[0]
+        self.model = tf.keras.models.Sequential()
+        self.model.add(tf.keras.layers.Dense(
+            layers[1], input_dim=layers[0], use_bias=True, kernel_initializer='random_uniform',
+            activation='relu'))
 
-        self.model = tf.keras.models.Sequential(
-            [tf.keras.layers.Dense(
-                4, input_dim=6, use_bias=True, kernel_initializer='random_uniform',
-                activation='relu'),
-             tf.keras.layers.Dense(
-                 3, use_bias=True, kernel_initializer='random_uniform',
-                 activation='softmax')])
+        for layer in layers[2:-1]:
+            self.model.add(tf.keras.layers.Dense(
+                layer, use_bias=True, kernel_initializer='random_uniform',
+                activation='relu'))
+
+        self.model.add(tf.keras.layers.Dense(
+            layers[-1], use_bias=True, kernel_initializer='random_uniform',
+            activation='softmax'))
 
     def predict(self, inp_arr):
         return(self.model.predict(np.asarray(
-            inp_arr, dtype=int).reshape([1, 6])).tolist()[0])
+            inp_arr, dtype=int).reshape([1, self.input_nodes])).tolist()[0])
 
     def get_weights(self):
         return self.model.get_weights()
