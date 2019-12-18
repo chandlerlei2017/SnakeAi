@@ -9,8 +9,9 @@ class Mutator(object):
     # Randomly mutate some weights of some of the neural networks
     # Breed z new networks with combo from some of the parents
 
-    def __init__(self, mutate_chance, retain_top_ratio, retain_rest_ratio, layers):
+    def __init__(self, mutate_chance, mutate_weight_chance, retain_top_ratio, retain_rest_ratio, layers):
         self.mutate_chance = mutate_chance
+        self.mutate_weight_chance = mutate_weight_chance
         self.retain_top_ratio = retain_top_ratio
         self.retain_rest_ratio = retain_rest_ratio
         self.network_layers = layers
@@ -71,39 +72,41 @@ class Mutator(object):
     def mutate(self, network):
         weights = network.get_weights()
 
-        size = 0
-        for weight in weights:
-            size += weight.flatten().size
+        # size = 0
+        # for weight in weights:
+        #     size += weight.flatten().size
 
-        choice = random.randint(0, size-1)
+        # choice = random.randint(0, size-1)
 
-        count = 0
-        cont = True
+        # count = 0
+        # cont = True
 
         for index in range(len(weights)):
             if not index % 2:
                 for index2 in range(len(weights[index])):
                     for index3 in range(len(weights[index][index2])):
-                        if count == choice:
+                        # if count == choice:
+                        if self.mutate_weight_chance > random.random():
                             weights[index][index2][index3] = random.uniform(-1.0, 1.0)
 
-                            cont = False
-                            break
-                        count += 1
-                    if not cont:
-                        break
-                if not cont:
-                    break
+                            # cont = False
+                            # break
+                        # count += 1
+                #     if not cont:
+                #         break
+                # if not cont:
+                #     break
             else:
                 for index2 in range(len(weights[index])):
-                    if count == choice:
+                    # if count == choice:
+                    if self.mutate_weight_chance > random.random():
                         weights[index][index2] = random.uniform(-1.0, 1.0)
 
-                        cont = False
-                        break
-                    count += 1
-                if not cont:
-                    break
+                        # cont = False
+                        # break
+                    # count += 1
+                # if not cont:
+                #     break
 
         network.set_weights(weights)
 

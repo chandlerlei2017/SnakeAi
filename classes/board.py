@@ -111,7 +111,6 @@ class Board(object):
         self.snake.move()
 
         if self.count > self.timeout:
-            self.score -= 100
             self.finished = True
 
         elif not self.snake.valid() or not self.snake_inbounds():
@@ -147,7 +146,7 @@ class Board(object):
             self.resample += 1
 
         if self.sample_repeat >= 3:
-            self.score -= 100
+            self.score -= 50
             self.finished = True
 
         self.count += 1

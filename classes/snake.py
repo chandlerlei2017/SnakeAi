@@ -41,131 +41,93 @@ class Snake(object):
 
     def update_dir_ai(self, network, snack_x, snack_y, cols, rows):
         dir_mapping = {
-            (1, 0): "R",
-            (-1, 0): "L",
             (0, -1): "U",
-            (0, 1): "D"
+            (1, 0): "R",
+            (0, 1): "D",
+            (-1, 0): "L"
         }
         curr_dir = dir_mapping[(self.head.dir_x, self.head.dir_y)]
+
         body_pos = list(map(lambda square: (square.x, square.y), self.body))
+        body_pos = list(filter(lambda square: (self.head.x, self.head.y) != square, body_pos))
 
-        directions = [[0, -1], [1, -1], [1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1]]
-        clear = [[], [], [], [], [], [], [], []]
+        s_u = s_ur = s_r = s_dr = s_d = s_dl = s_l = s_ul = 0
 
-        for index, direction in enumerate(directions):
-            head_x, head_y = self.head.x, self.head.y
+        if snack_x == self.head.x:
+            if snack_y < self.head.y:
+                s_u = 1
+            elif snack_y > self.head.y:
+                s_d = 1
+        elif snack_y == self.head.y:
+            if snack_x < self.head.x:
+                s_l = 1
+            elif snack_x > self.head.x:
+                s_r = 1
+        elif snack_y - self.head.y == self.head.x - snack_x:
+            if snack_x > self.head.x:
+                s_ur = 1
+            elif snack_x < self.head.x:
+                s_dl = 1
+        elif snack_y - self.head.y == snack_x - self.head.x:
+            if snack_y > self.head.y:
+                s_dr = 1
+            elif snack_y < self.head.y:
+                s_ul = 1
 
-            for count in range(4):
-                head_x += direction[0]
-                head_y += direction[1]
+        wall_u = 1 / (self.head.y + 1)
+        wall_ur = 1 / min(self.head.y + 1, cols - self.head.x)
+        wall_r = 1 / (cols - self.head.x)
+        wall_dr = 1 / min(rows - self.head.y, cols - self.head.x)
+        wall_d = 1 / (rows - self.head.y)
+        wall_dl = 1 / min(self.head.x + 1, rows - self.head.y)
+        wall_l = 1 / (self.head.x + 1)
+        wall_ul = 1 / min(self.head.x + 1, self.head.y + 1)
 
-                clear[index].append(0 <= head_x <= cols - 1 and 0 <= head_y <=
-                                    rows - 1 and (head_x, head_y) not in body_pos)
+        dir_snake = [0] * 8
 
-        # up_cond = self.head.y > 0 and (self.head.x, self.head.y - 1) not in body_pos
-        # left_cond = self.head.x > 0 and (self.head.x - 1, self.head.y) not in body_pos
-        # down_cond = self.head.y < rows - 1 and (self.head.x, self.head.y + 1) not in body_pos
-        # right_cond = self.head.x < cols - 1 and (self.head.x + 1, self.head.y) not in body_pos
+        for square in body_pos:
+            if square[0] == self.head.x:
+                if square[1] < self.head.y:
+                    dir_snake[0] = 1
+                elif square[1] > self.head.y:
+                    dir_snake[4] = 1
+            elif square[1] == self.head.y:
+                if square[0] < self.head.x:
+                    dir_snake[6] = 1
+                elif square[0] > self.head.x:
+                    dir_snake[2] = 1
+            elif square[1] - self.head.y == self.head.x - square[0]:
+                if square[0] > self.head.x:
+                    dir_snake[1] = 1
+                elif square[0] < self.head.x:
+                    dir_snake[5] = 1
+            elif square[1] - self.head.y == square[0] - self.head.x:
+                if square[1] > self.head.y:
+                    dir_snake[3] = 1
+                elif square[1] < self.head.y:
+                    dir_snake[7] = 1
 
-        snack_up = snack_y < self.head.y
-        snack_left = snack_x < self.head.x
-        snack_down = snack_y > self.head.y
-        snack_right = snack_x > self.head.x
+        if curr_dir == "U":
+            snack_params = [s_u, s_ur, s_r, s_dr, s_d, s_dl, s_l, s_ul]
+            wall_params = [wall_u, wall_ur, wall_r, wall_dr, wall_d, wall_dl, wall_l, wall_ul]
+            snake_params = dir_snake
 
-        if curr_dir == "R":
-            # c_left = up_cond
-            # c_right = down_cond
-            # c_foward = right_cond
-
-            s_left = snack_up
-            s_foward = snack_right
-            s_right = snack_down
-            s_backward = snack_left
-
-            c_l = clear[0]
-            c_lf = clear[1]
-            c_f = clear[2]
-            c_rf = clear[3]
-            c_r = clear[4]
-            c_rb = clear[5]
-            c_b = clear[6]
-            c_lb = clear[7]
+        elif curr_dir == "R":
+            snack_params = [s_r, s_dr, s_d, s_dl, s_l, s_ul, s_u, s_ur]
+            wall_params = [wall_r, wall_dr, wall_d, wall_dl, wall_l, wall_ul, wall_u, wall_ur]
+            snake_params = dir_snake[2:] + dir_snake[:2]
 
         elif curr_dir == "L":
-            # c_left = down_cond
-            # c_right = up_cond
-            # c_foward = left_cond
-
-            s_left = snack_down
-            s_foward = snack_left
-            s_right = snack_up
-            s_backward = snack_right
-
-            c_l = clear[4]
-            c_lf = clear[5]
-            c_f = clear[6]
-            c_rf = clear[7]
-            c_r = clear[0]
-            c_rb = clear[1]
-            c_b = clear[2]
-            c_lb = clear[3]
-
-        elif curr_dir == "U":
-            # c_left = left_cond
-            # c_right = right_cond
-            # c_foward = up_cond
-
-            s_left = snack_left
-            s_foward = snack_up
-            s_right = snack_right
-            s_backward = snack_down
-
-            c_l = clear[6]
-            c_lf = clear[7]
-            c_f = clear[0]
-            c_rf = clear[1]
-            c_r = clear[2]
-            c_rb = clear[3]
-            c_b = clear[4]
-            c_lb = clear[5]
+            snack_params = [s_l, s_ul, s_u, s_ur, s_r, s_dr, s_d, s_dl]
+            wall_params = [wall_l, wall_ul, wall_u, wall_ur, wall_r, wall_dr, wall_d, wall_dl]
+            snake_params = dir_snake[6:] + dir_snake[:6]
 
         elif curr_dir == "D":
-            # c_left = right_cond
-            # c_right = left_cond
-            # c_foward = down_cond
+            snack_params = [s_d, s_dl, s_l, s_ul, s_u, s_ur, s_r, s_dr]
+            wall_params = [wall_d, wall_dl, wall_l, wall_ul, wall_u, wall_ur, wall_r, wall_dr]
+            snake_params = dir_snake[4:] + dir_snake[:4]
 
-            s_left = snack_right
-            s_foward = snack_down
-            s_right = snack_left
-            s_backward = snack_up
-
-            c_l = clear[2]
-            c_lf = clear[3]
-            c_f = clear[4]
-            c_rf = clear[5]
-            c_r = clear[6]
-            c_rb = clear[7]
-            c_b = clear[0]
-            c_lb = clear[1]
-
-        # res = network.predict(
-        #     [
-        #         int(c_foward),
-        #         int(c_left),
-        #         int(c_right),
-        #         int(s_foward),
-        #         int(s_left),
-        #         int(s_right)])
-
-        predict_input = [int(s_left), int(s_right), int(s_foward), int(s_backward)]
-        predict_input += [int(x) for x in c_l]
-        predict_input += [int(x) for x in c_lf]
-        predict_input += [int(x) for x in c_f]
-        predict_input += [int(x) for x in c_rf]
-        predict_input += [int(x) for x in c_r]
-        predict_input += [int(x) for x in c_rb]
-        predict_input += [int(x) for x in c_b]
-        predict_input += [int(x) for x in c_lb]
+        predict_input = snack_params + wall_params + snake_params
 
         res = network.predict(predict_input)
 

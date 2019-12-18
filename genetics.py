@@ -16,13 +16,14 @@ SURFACE = pygame.display.set_mode((WIDTH, HEIGHT))
 CLOCK = pygame.time.Clock()
 B = Board(SURFACE, WIDTH, HEIGHT, ROWS, COLS, BLACK, False)
 
-GENS = 200
-POP_SIZE = 30
+GENS = 250
+POP_SIZE = 250
 MUTATE_CHANCE = 0.3
+MUTATE_WEIGHT_CHANCE = 0.02
 RETAIN_TOP_RATIO = 0.3
 RETAIN_REST_RATIO = 0.1
 
-LAYERS = [36, 20, 3]
+LAYERS = [24, 14, 3]
 
 
 def get_file_name():
@@ -78,7 +79,7 @@ def main():
 
     # networks = [Network([6, 4, 3]) for i in range(POP_SIZE)]
     networks = [Network(LAYERS) for i in range(POP_SIZE)]
-    mutator = Mutator(MUTATE_CHANCE, RETAIN_TOP_RATIO, RETAIN_REST_RATIO, LAYERS)
+    mutator = Mutator(MUTATE_CHANCE, MUTATE_WEIGHT_CHANCE, RETAIN_TOP_RATIO, RETAIN_REST_RATIO, LAYERS)
 
     for i in range(GENS):
         print("GEN {}".format(i + 1))
@@ -88,16 +89,22 @@ def main():
         for network in networks:
             cont = True
             B.update_network(network)
+            running = True
 
             while cont:
-                pygame.time.delay(50)
-                CLOCK.tick(30)
+                pygame.time.delay(10)
+                CLOCK.tick(50)
 
-                if pygame.QUIT in list(map(lambda event: event.type, pygame.event.get())):
-                    pygame.quit()
+                for e in pygame.event.get():
+                    if e.type == pygame.QUIT:
+                        pygame.quit()
+                    if e.type == pygame.KEYDOWN:
+                        if e.key == pygame.K_SPACE:
+                            running = not running
 
-                B.redraw_surface()
-                cont = not B.finished
+                if running:
+                    B.redraw_surface()
+                    cont = not B.finished
 
             scores.append(B.score)
             print(B.score)
