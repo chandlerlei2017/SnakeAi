@@ -27,7 +27,7 @@ Found in classes/NN.py, the Neural network is preset to 6 inputs, 3 outputs, and
 #### Inputs (In 8 directions around the snake)
 1. Food present in that direction
 2. Distance to the wall in that direction
-3. Distance to snake body in that direction
+3. Snake body present in that direction
 
 #### Outputs (Soft-Max)
 1. Turn to the left
