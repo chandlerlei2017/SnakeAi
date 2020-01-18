@@ -24,13 +24,10 @@ $ python genetics.py
 
 Found in classes/NN.py, the Neural network is preset to 6 inputs, 3 outputs, and 1 hidden layer with 4 units.
 
-#### Inputs (directions relative to the direction of the Snake)
-1. No obstacles directly to the left
-2. No obstacles directly in front
-3. No obstacles directly to the right
-4. Apple is to the left of the snake 
-5. Apple is to the right of the snake
-6. Applie is in front of the snake
+#### Inputs (In 8 directions around the snake)
+1. Food present in that direction
+2. Distance to the wall in that direction
+3. Distance to snake body in that direction
 
 #### Outputs (Soft-Max)
 1. Turn to the left
