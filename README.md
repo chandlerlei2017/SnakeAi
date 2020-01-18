@@ -22,7 +22,7 @@ $ python genetics.py
 
 ## Neural Network
 
-Found in classes/NN.py, the Neural network is preset to 6 inputs, 3 outputs, and 1 hidden layer with 4 units.
+Found in classes/NN.py, the Neural network is preset to 24 inputs, 3 outputs, and 1 hidden layer with 14 units.
 
 #### Inputs (In 8 directions around the snake)
 1. Food present in that direction
